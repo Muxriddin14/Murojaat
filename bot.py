@@ -18,7 +18,6 @@ bot = Bot(
 )
 dp = Dispatcher()
 
-# ================= DATABASE =================
 db = sqlite3.connect("database.db")
 cursor = db.cursor()
 
@@ -58,7 +57,6 @@ def save_complaint(full_name, phone, complaint):
     )
     db.commit()
 
-# ================= FSM =================
 class ComplaintStates(StatesGroup):
     full_name = State()
     phone = State()
@@ -66,7 +64,6 @@ class ComplaintStates(StatesGroup):
 
 PHONE_REGEX = r"^\+998\d{9}$"
 
-# ================= COMMANDS =================
 @dp.message(Command("start"))
 async def start_handler(message: types.Message, state: FSMContext):
     await state.clear()
@@ -82,7 +79,6 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("❌ Murojaat bekor qilindi.")
 
-# ================= FSM HANDLERS =================
 @dp.message(ComplaintStates.full_name)
 async def get_full_name(message: types.Message, state: FSMContext):
     if message.text.startswith("/"):
@@ -104,7 +100,7 @@ async def get_phone(message: types.Message, state: FSMContext):
         return
 
     await state.update_data(phone=message.text)
-    await message.answer("📝 Shikoyatingiz matnini kiriting:")
+    await message.answer("📝 Murojaatingiz matnini kiriting:")
     await state.set_state(ComplaintStates.complaint)
 
 @dp.message(ComplaintStates.complaint)
@@ -126,7 +122,7 @@ async def get_complaint(message: types.Message, state: FSMContext):
         "📨 <b>Yangi murojaat</b>\n\n"
         f"👤 <b>F.I.Sh:</b> {full_name}\n"
         f"☎️ <b>Telefon:</b> {phone}\n"
-        f"📝 <b>Shikoyat:</b>\n{complaint}"
+        f"📝 <b>Murojaat mazmuni:</b>\n{complaint}"
     )
 
     for admin_id in receivers:
@@ -138,7 +134,6 @@ async def get_complaint(message: types.Message, state: FSMContext):
     await message.answer("✅ Murojaatingiz qabul qilindi. Rahmat!")
     await state.clear()
 
-# ================= ADMIN =================
 @dp.message(Command("admin"))
 async def admin_handler(message: types.Message, state: FSMContext):
     if message.from_user.id != SUPER_ADMIN_ID:
@@ -150,10 +145,10 @@ async def admin_handler(message: types.Message, state: FSMContext):
 async def add_admin_handler(message: types.Message):
     add_admin(int(message.text))
     await message.answer("✅ Admin qo‘shildi")
-
-# ================= RUN =================
+    
 async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
+
